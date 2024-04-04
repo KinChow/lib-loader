@@ -1,0 +1,3 @@
+[submodule "examples/include"]
+	path = examples/include
+	url = https://github.com/KhronosGroup/OpenCL-Headers.git
