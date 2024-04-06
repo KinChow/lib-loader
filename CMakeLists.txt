@@ -25,9 +25,7 @@ project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
 
-option(ENABLE_EXAMPLE "Enable examples of LibLoader." ${MASTER_PROJECT})
-
-set(CMAKE_CXX_STANDARD 17)
+option(ENABLE_EXAMPLE "Enable examples of LibLoader." OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
