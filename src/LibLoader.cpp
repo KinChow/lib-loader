@@ -2,24 +2,17 @@
  * @Author: Zhou Zijian 
  * @Date: 2023-04-06 00:11:43 
  * @Last Modified by: Zhou Zijian
- * @Last Modified time: 2023-04-08 23:29:59
+ * @Last Modified time: 2024-06-20 03:04:17
  */
 
-#ifdef _WIN32
-#include "WindowsLibLoader.h"
-#else
-#include "LinuxLibLoader.h"
-#endif
+
+#include "LibLoader.h"
 #include "ILibLoader.h"
 
 int OpenLib(const char *libName, void **handle)
 {
     *handle = nullptr;
-#ifdef _WIN32
-    LibLoader *libLoader = new WindowsLibLoader;
-#else
-    LibLoader *libLoader = new LinuxLibLoader;
-#endif
+    ILibLoader *libLoader = ILibLoader::Create();
     if (libLoader == nullptr) {
         return -1;
     }
@@ -32,7 +25,7 @@ void *LoadFunc(void *handle, const char *funcName)
     if (handle == nullptr) {
         return nullptr;
     }
-    auto libLoader = static_cast<LibLoader *>(handle);
+    auto libLoader = static_cast<ILibLoader *>(handle);
     return libLoader->LoadFunc(funcName);
 }
 
@@ -41,7 +34,8 @@ int CloseLib(void *handle)
     if (handle == nullptr) {
         return -1;
     }
-    auto libLoader = static_cast<LibLoader *>(handle);
-    handle = nullptr;
-    return libLoader->CloseLib();
+    auto libLoader = static_cast<ILibLoader *>(handle);
+    int ret = libLoader->CloseLib();
+    ILibLoader::Destroy(libLoader);
+    return ret;
 }

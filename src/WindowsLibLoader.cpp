@@ -2,11 +2,38 @@
  * @Author: Zhou Zijian 
  * @Date: 2023-04-06 00:26:30 
  * @Last Modified by: Zhou Zijian
- * @Last Modified time: 2024-01-22 01:05:51
+ * @Last Modified time: 2024-06-20 02:43:09
  */
 
 #ifdef _WIN32
 #include "WindowsLibLoader.h"
+
+ILibLoader *ILibLoader::Create()
+{
+    return WindowsLibLoader::Create();
+}
+
+void ILibLoader::Destroy(ILibLoader *loader)
+{
+    WindowsLibLoader::Destroy(static_cast<WindowsLibLoader *>(loader));
+}
+
+WindowsLibLoader *WindowsLibLoader::Create()
+{
+    return new WindowsLibLoader;
+}
+
+void WindowsLibLoader::Destroy(WindowsLibLoader *loader)
+{
+    if (loader != nullptr) {
+        delete loader;
+    }
+}
+
+WindowsLibLoader::~WindowsLibLoader()
+{
+    CloseLib();
+}
 
 int WindowsLibLoader::OpenLib(const char *libName)
 {

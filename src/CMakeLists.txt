@@ -1,12 +1,20 @@
 cmake_minimum_required(VERSION 3.20)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
+set(LIBLOADER_INTERNAL_HEADER_DIR ${PROJECT_SOURCE_DIR}/internal)
 
-aux_source_directory(. DIR_SRCS)
+set(LIBLOADER_INTERFACE_HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
 
-add_library(LibLoader STATIC ${DIR_SRCS})
+include_directories(
+    ${LIBLOADER_INTERNAL_HEADER_DIR}
+    ${LIBLOADER_INTERFACE_HEADER_DIR}
+)
+
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} LIBLOADER_SRC_DIR)
+
+add_library(LibLoader STATIC ${LIBLOADER_SRC_DIR})
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/output)
 
-file(GLOB allCopyFiles  "${CMAKE_CURRENT_SOURCE_DIR}/../include/*")
-file(COPY ${allCopyFiles} DESTINATION ${LIBRARY_OUTPUT_PATH})
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${LIBLOADER_INTERFACE_HEADER_DIR} ${LIBRARY_OUTPUT_PATH}/include
+)

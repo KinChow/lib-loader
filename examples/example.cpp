@@ -2,14 +2,14 @@
  * @Author: Zhou Zijian 
  * @Date: 2023-04-06 00:57:56 
  * @Last Modified by: Zhou Zijian
- * @Last Modified time: 2023-04-06 01:28:47
+ * @Last Modified time: 2024-06-20 02:34:09
  */
 
 #define CL_TARGET_OPENCL_VERSION 100
 
 #include <iostream>
 #include <CL/cl.h>
-#include "ILibLoader.h"
+#include "LibLoader.h"
 
 using clGetPlatformIDsPtrFunc = decltype(&clGetPlatformIDs);
 
