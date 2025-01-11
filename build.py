@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2024, Zhou Zijian
@@ -16,37 +16,79 @@
 # limitations under the License.
 
 import argparse
+from enum import Enum
 from typing import List
-from builder import Builder, CMakeBuilder, CMakeWindowsVsMsvcBuilder, CMakeAndroidBuilder
+from builder import Builder, BuilderType, BuilderFactory
 
-def get_args() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build and install the project")
-    parser.add_argument("--platform", help="Build the project", default="Windows", choices=["Windows", "Android", "Linux"])
-    parser.add_argument("--clean", action="store_true", help="Clean the build directory")
-    parser.add_argument("--example", action="store_true", help="Build the example")
+
+class Platform(Enum):
+    WINDOWS = "Windows"
+    ANDROID = "Android"
+    LINUX = "Linux"
+
+
+def get_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Build and install the project")
+    parser.add_argument(
+        "--platform",
+        type=Platform,
+        choices=list(Platform),
+        default=Platform.WINDOWS,
+        help="Build platform"
+    )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Clean the build directory"
+    )
+    parser.add_argument(
+        "--prefix",
+        default="",
+        help="Prefix path of compiler"
+    )
+    parser.add_argument(
+        "--example",
+        action="store_true",
+        help="Build the example"
+    )
     args = parser.parse_args()
     return args
 
-def get_builder(args) -> Builder:
-    if args.platform == "Windows":
-        return CMakeWindowsVsMsvcBuilder("build", "output")
-    elif args.platform == "Android":
-        return CMakeAndroidBuilder("build", "output")
-    else:
-        return CMakeBuilder("build", "output")
-    
+
+def get_builder(args: argparse.Namespace) -> Builder:
+    builder_map = {
+        Platform.ANDROID: (BuilderType.CMAKE_ANDROID, "build"),
+        Platform.WINDOWS: (BuilderType.CMAKE_WINDOWS_VS_MSVC, "build"),
+        Platform.LINUX: (BuilderType.CMAKE_GCC, "build", args.prefix),
+    }
+    builder_type, *builder_args = builder_map.get(args.platform, (None,))
+    return BuilderFactory.create(builder_type, *builder_args) if builder_type else None
+
+
 def get_options(args) -> List[str]:
     options = []
     if args.example:
         options += ["-DENABLE_EXAMPLE=ON"]
     return options
 
-if __name__ == "__main__":
+
+def main():
     args = get_args()
     builder = get_builder(args)
-    options = get_options(args)
+
+    if not builder:
+        print("Unsupported platform")
+        return 1
+
     if args.clean:
         builder.clean()
-        exit(0)
+        return 0
+
+    options = get_options(args)
     builder.build(options)
-    # builder.install()
+    return 0
+
+
+if __name__ == "__main__":
+    exit(main())
